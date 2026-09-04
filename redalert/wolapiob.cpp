@@ -2755,7 +2755,14 @@ bool WolapiObject::SendGameOpt(const char* szSend, User* pUserPriv)
         }
     } else {
         //		debugprint( "Send private game opt to %s: '%s'\n", (char*)pUserPriv->name, szSend );
-        if (!SUCCEEDED(pChat->RequestPrivateGameOptions(pUserPriv, szSend))) {
+        //	pUserPriv points into the sink's user list, so its next pointer still
+        //	chains to everyone listed after it. The recipient list is built by
+        //	walking that chain, which would deliver this private message to those
+        //	users as well - ourselves included, and ProcessInform aborts when it
+        //	is handed back one of our own request opcodes.
+        User UserOnly = *pUserPriv;
+        UserOnly.next = NULL;
+        if (!SUCCEEDED(pChat->RequestPrivateGameOptions(&UserOnly, szSend))) {
             //			debugprint( "RequestPrivateGameOptions() call failed\n" );
             return false;
         }
@@ -2816,7 +2823,11 @@ bool WolapiObject::SendGo(const char* szSend)
         //		if( !( pUser->flags & CHAT_USER_MYSELF ) )			Method changed. I now wait for go message to bounce back to me.
         //		{
         //			debugprint( "Send private game opt to %s: '%s'\n", (char*)pUser->name, szSend );
-        if (!SUCCEEDED(pChat->RequestPrivateGameOptions(pUser, szSend))) {
+        //	Send to this user alone: the list node still chains to the users
+        //	after it, which would send them a duplicate for every earlier player.
+        User UserOnly = *pUser;
+        UserOnly.next = NULL;
+        if (!SUCCEEDED(pChat->RequestPrivateGameOptions(&UserOnly, szSend))) {
             //				debugprint( "RequestPrivateGameOptions() call failed\n" );
             return false;
         }
