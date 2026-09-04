@@ -214,13 +214,9 @@ int WOL_Login_Dialog(WolapiObject* pWO)
     //	Get saved nickname/passwords from the registry.
     if (ReadSavedNicks(pWO, NickList, szNameBuffer, szPassBuffer)) {
         PassEdit.bClearOnNextSetFocus = true;
-    } else {
-        //	Offer user the chance to go to web site now to get a nick.
-        if (pWO->DoWebRegistration()) {
-            //	User chose to go to web page. Leave function so that we'll re-read nicks when they return.
-            return 0;
-        }
     }
+    //	No saved nickname is the normal first-run case: the lobby service registers
+    //	any unused nickname on first login, so there is no web registration to offer.
 
     /*
 	**	Create the button list.

@@ -44,7 +44,8 @@ void Sleep(DWORD ms)
 short GetAsyncKeyState(int key)
 {
     if (Keyboard != NULL && Keyboard->Down((unsigned short)key)) {
-        return (short)0x8000;
+        // Held now, plus the low bit so the dialogs' "pressed since last call" checks fire.
+        return (short)0x8001;
     }
     return 0;
 }
