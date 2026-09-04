@@ -28,6 +28,7 @@
 
 #include "function.h"
 #include "wollobby.h"
+#include "msgbox.h"
 #include "wolapi/chatdefs.h"
 #include "wolapi/netutildefs.h"
 #include "common/sockets.h"
@@ -550,6 +551,54 @@ namespace
             }
         }
 
+        /*
+
+        ** True when the dialog that made this request has its own message for
+
+        ** the error code, so the server text would only duplicate it.
+
+        */
+
+        static bool UI_Has_Text_For(PendingKind kind, const std::string& code)
+
+        {
+
+            switch (kind) {
+
+            case PK_LOGIN:
+
+            case PK_REGISTER:
+
+                return code == "bad_pass" || code == "nick_in_use";
+
+            case PK_JOIN:
+
+                return code == "no_such_channel" || code == "bad_key" || code == "banned" || code == "channel_full";
+
+            case PK_HELLO:
+
+            case PK_LOGOUT:
+
+            case PK_CHANNELS:
+
+            case PK_LADDER:
+
+            case PK_RESULTS:
+
+            case PK_FIND:
+
+            case PK_PAGE:
+
+            case PK_USERIP:
+
+                return true; // reported through their own callbacks
+
+            default:
+
+                return false;
+            }
+        }
+
         void Send_User_List(const json& users)
         {
             LinkedList<User> list;
@@ -581,6 +630,12 @@ namespace
             if (!ok) {
                 if (code == "banned" && ChatSink) {
                     ChatSink->OnServerBannedYou(S_OK, (time_t)j.value("until", 0LL));
+                }
+                std::string message = JStr(j, "message");
+                if (!message.empty() && !UI_Has_Text_For(p.kind, code)) {
+                    // The lobby screens only know a handful of error codes; for
+                    // anything else show the server's own explanation.
+                    WWMessageBox().Process(message.c_str());
                 }
                 Deliver_Error(p, Error_To_HRESULT(code), code);
                 return;
