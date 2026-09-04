@@ -297,10 +297,19 @@ namespace
     */
         void Connect(const char* url)
         {
+            Socket.stop(); // synchronous: the old socket's close notice has been delivered by now
+            {
+                // Drop anything left from a previous connection: the close notice of
+                // the old socket must not be mistaken for a failure of the new one,
+                // and requests still waiting on the old socket can never be answered.
+                std::lock_guard<std::mutex> lock(Mutex);
+                Inbox.clear();
+            }
+            Waiting.clear();
+            Held.clear();
             Failed = false;
             Open = false;
             LoggedIn = false;
-            Socket.stop();
             Socket.setUrl(url);
             Socket.start();
             Pending p;
