@@ -1,21 +1,24 @@
-//
-// Copyright 2020 Electronic Arts Inc.
-//
-// TiberianDawn.DLL and RedAlert.dll and corresponding source code is free
-// software: you can redistribute it and/or modify it under the terms of
-// the GNU General Public License as published by the Free Software Foundation,
-// either version 3 of the License, or (at your option) any later version.
-
-// TiberianDawn.DLL and RedAlert.dll and corresponding source code is distributed
-// in the hope that it will be useful, but with permitted additional restrictions
-// under Section 7 of the GPL. See the GNU General Public License in LICENSE.TXT
-// distributed with this program. You should have received a copy of the
-// GNU General Public License along with permitted additional restrictions
-// with this program. If not, see https://github.com/electronicarts/CnC_Remastered_Collection
+/*
+**	Command & Conquer Red Alert(tm)
+**	Copyright 2025 Electronic Arts Inc.
+**
+**	This program is free software: you can redistribute it and/or modify
+**	it under the terms of the GNU General Public License as published by
+**	the Free Software Foundation, either version 3 of the License, or
+**	(at your option) any later version.
+**
+**	This program is distributed in the hope that it will be useful,
+**	but WITHOUT ANY WARRANTY; without even the implied warranty of
+**	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**	GNU General Public License for more details.
+**
+**	You should have received a copy of the GNU General Public License
+**	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 //	New character strings for wolapi integration.
 
-//#ifdef WOLAPI_INTEGRATION
+#ifdef WOLAPI_INTEGRATION
 #include "function.h"
 #include "wolstrng.h"
 
@@ -79,8 +82,7 @@ const char TXT_WOL_REDALERTLOBBIES[] = "Red Alert Lobbies";
 const char TXT_WOL_CHANNELLISTLOADING[] = "...downloading...";
 
 const char TXT_WOL_YOURENOTINCHANNEL[] = "You are not currently in a chat channel.";
-//	"Action" button. Causes text entered by user to show up as if they were performing an action, as opposed to
-//speaking.
+//	"Action" button. Causes text entered by user to show up as if they were performing an action, as opposed to speaking.
 const char TXT_WOL_ACTION[] = "Action";
 //	"Join" button. Allows user to join a channel, game, or WW Online level.
 const char TXT_WOL_JOIN[] = "Join";
@@ -151,9 +153,9 @@ const char TXT_WOL_ONPAGE[] = "Page from %s: %s";
 //	%s is replaced with name of user being paged.
 const char TXT_WOL_WASPAGED[] = "%s was successfully paged.";
 //	%s is replaced with the name of a user that has just been squelched. (Currently unused.)
-// const char TXT_WOL_USERISSQUELCHED[]		= "%s has been squelched.";
+//const char TXT_WOL_USERISSQUELCHED[]		= "%s has been squelched.";
 //	%s is replaced with the name of a user that has had squelch removed. (Currently unused.)
-// const char TXT_WOL_USERISNOTSQUELCHED[]		= "%s is no longer squelched.";
+//const char TXT_WOL_USERISNOTSQUELCHED[]		= "%s is no longer squelched.";
 
 const char TXT_WOL_ONLYOWNERCANKICK[] = "Only the channel owner can kick users out.";
 //	Both %s replaced with user names.
@@ -282,8 +284,7 @@ const char TXT_WOL_TOURNAMENTPLAYERLIMIT[] = "Tournament games must be two playe
 const char TXT_WOL_PRIVATEPASSWORD[] = "Password: %s";
 //	User cannot join game because either he or the game host has hacked the game.
 const char TXT_WOL_RULESMISMATCH[] = "Your game is incompatible with the host's!";
-//	Message appears when game host presses start button but slow responses cause an automatic cancellation of game
-//start.
+//	Message appears when game host presses start button but slow responses cause an automatic cancellation of game start.
 const char TXT_WOL_STARTTIMEOUT[] = "Timed out waiting for guest responses! Game start cancelled.";
 //	Message appears for guests when automatic cancellation occurs.
 const char TXT_WOL_STARTCANCELLED[] = "Game start cancelled.";
@@ -295,8 +296,7 @@ const char TXT_WOL_PATCHQUESTION[] = "An update patch is required for Internet p
 const char TXT_WOL_DOWNLOADING[] = "Download file %i of %i";
 
 const char TXT_WOL_DOWNLOADERROR[] = "An error occurred during file download.";
-//	Appears on patch download dialog. First %i = current # of bytes downloaded, second %i = total # of bytes to
-//download.
+//	Appears on patch download dialog. First %i = current # of bytes downloaded, second %i = total # of bytes to download.
 const char TXT_WOL_DOWNLOADBYTES[] = "Received %i bytes out of %i. (%i%%%%)";
 //	Appears on patch download dialog. First %i = number of minutes left, second %i = number of seconds left.
 const char TXT_WOL_DOWNLOADTIME[] = "Time Remaining: %i min. %i secs.";
@@ -322,8 +322,7 @@ const char TXT_WOL_WEBREGISTRATIONSHELL[] =
 const char TXT_WOL_GAMEADVERTSHELL[] = "Are you sure you want to launch the Internet browser for information about %s?";
 //	Appears above user list. %i = number of users in the current channel.
 const char TXT_WOL_USERLIST[] = "Users   %i";
-//	Appears above user list to explain why no users are being listed: because the user is not currently in a chat
-//channel.
+//	Appears above user list to explain why no users are being listed: because the user is not currently in a chat channel.
 const char TXT_WOL_NOUSERLIST[] = "(not in a channel)";
 
 const char TXT_WOL_CANTCREATEHERE[] = "To start a game, you have to be in a Red Alert lobby.";
@@ -480,8 +479,8 @@ const char TXT_WOL_PAGE_NOTHERE[] = "Der genannte User ist nicht eingeloggt.";
 const char TXT_WOL_PAGE_OFF[] = "Der genannte User hat die Empfangsfunktion ausgeschaltet.";
 const char TXT_WOL_ONPAGE[] = "Sende von %s: %s";
 const char TXT_WOL_WASPAGED[] = "Die Nachricht wurde %s erfolgreich zugestellt.";
-// const char TXT_WOL_USERISSQUELCHED[]		= "%s ist zur Zeit nicht erreichbar.";
-// const char TXT_WOL_USERISNOTSQUELCHED[]		= "%s ist jetzt wieder erreichbar.";
+//const char TXT_WOL_USERISSQUELCHED[]		= "%s ist zur Zeit nicht erreichbar.";
+//const char TXT_WOL_USERISNOTSQUELCHED[]		= "%s ist jetzt wieder erreichbar.";
 const char TXT_WOL_ONLYOWNERCANKICK[] = "Nur der Channel-Besitzer kann andere User hinauswerfen.";
 const char TXT_WOL_USERKICKEDUSER[] = "%s hat %s aus dem Channel geworfen.";
 const char TXT_WOL_USERKICKEDYOU[] = "Sie wurden von %s aus dem Channel geworfen.";
@@ -523,7 +522,7 @@ const char TXT_WOL_OPTFIND[] = "Lassen Sie zu, da\251 andere Sie FINDEN.";
 const char TXT_WOL_OPTPAGE[] = "Lassen Sie zu, da\251 andere Ihnen Nachrichten SENDEN.";
 const char TXT_WOL_OPTLANGUAGE[] = "Unangemessene Sprache herausfiltern.";
 const char TXT_WOL_OPTGAMESCOPE[] = "Nur lokale Spiel-Lobby anzeigen.";
-// const char TXT_WOL_OPTTITLE[]				= "Optionen";
+//const char TXT_WOL_OPTTITLE[]				= "Optionen";
 const char TXT_WOL_CHANNELGONE[] = "Channel existiert nicht mehr.";
 const char TXT_WOL_CG_TITLE[] = "Spiel erstellen";
 const char TXT_WOL_CG_PLAYERS[] = "Spieler:  %i";
@@ -688,8 +687,8 @@ const char TXT_WOL_PAGE_NOTHERE[] = "L'utilisateur sp‚cifi‚ n'a pas ouvert la se
 const char TXT_WOL_PAGE_OFF[] = "L'utilisateur sp‚cifi‚ a d‚sactiv‚ la fonction d'envoi de messages.";
 const char TXT_WOL_ONPAGE[] = "Envoi de %s : %s";
 const char TXT_WOL_WASPAGED[] = "Envoi … %s r‚ussi.";
-// const char TXT_WOL_USERISSQUELCHED[]		= "%s a ‚t‚ rejet‚.";				//	ajw rejete really means squelched?
-// const char TXT_WOL_USERISNOTSQUELCHED[]		= "%s n'est plus rejet‚.";
+//const char TXT_WOL_USERISSQUELCHED[]		= "%s a ‚t‚ rejet‚.";				//	ajw rejete really means squelched?
+//const char TXT_WOL_USERISNOTSQUELCHED[]		= "%s n'est plus rejet‚.";
 const char TXT_WOL_ONLYOWNERCANKICK[] = "Seul le responsable du canal peut expulser des utilisateurs.";
 const char TXT_WOL_USERKICKEDUSER[] = "%s expulse %s du canal.";
 const char TXT_WOL_USERKICKEDYOU[] = "Vous ˆtes expuls‚ du canal par %s.";
@@ -731,7 +730,7 @@ const char TXT_WOL_OPTFIND[] = "Laisser les autres vous RECHERCHER.";
 const char TXT_WOL_OPTPAGE[] = "Laisser les autres vous ENVOYER des messages.";
 const char TXT_WOL_OPTLANGUAGE[] = "Filtrer les vulgarit‚s.";
 const char TXT_WOL_OPTGAMESCOPE[] = "Afficher seulement les parties en salons locaux.";
-// const char TXT_WOL_OPTTITLE[]				= "Options";
+//const char TXT_WOL_OPTTITLE[]				= "Options";
 const char TXT_WOL_CHANNELGONE[] = "Ce canal n'existe plus.";
 const char TXT_WOL_CG_TITLE[] = "Cr‚er une partie";
 const char TXT_WOL_CG_PLAYERS[] = "Joueurs :  %i";
@@ -832,4 +831,4 @@ const char TXT_WOL_PRIVATE[] = "<personnel>";
 
 #endif
 
-//#endif
+#endif

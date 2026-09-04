@@ -1,24 +1,23 @@
-//
-// Copyright 2020 Electronic Arts Inc.
-//
-// TiberianDawn.DLL and RedAlert.dll and corresponding source code is free
-// software: you can redistribute it and/or modify it under the terms of
-// the GNU General Public License as published by the Free Software Foundation,
-// either version 3 of the License, or (at your option) any later version.
-
-// TiberianDawn.DLL and RedAlert.dll and corresponding source code is distributed
-// in the hope that it will be useful, but with permitted additional restrictions
-// under Section 7 of the GPL. See the GNU General Public License in LICENSE.TXT
-// distributed with this program. You should have received a copy of the
-// GNU General Public License along with permitted additional restrictions
-// with this program. If not, see https://github.com/electronicarts/CnC_Remastered_Collection
-#pragma once
+/*
+**	Command & Conquer Red Alert(tm)
+**	Copyright 2025 Electronic Arts Inc.
+**
+**	This program is free software: you can redistribute it and/or modify
+**	it under the terms of the GNU General Public License as published by
+**	the Free Software Foundation, either version 3 of the License, or
+**	(at your option) any later version.
+**
+**	This program is distributed in the hope that it will be useful,
+**	but WITHOUT ANY WARRANTY; without even the implied warranty of
+**	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**	GNU General Public License for more details.
+**
+**	You should have received a copy of the GNU General Public License
+**	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifdef WOLAPI_INTEGRATION
 
-#ifndef WIN32
-#error WOLAPI_INTEGRATION can't be specified for non WIN32 version!
-#endif
 
 //	rawolapi.h - WOLAPI sinks declarations.
 //	ajw 07/10/98
@@ -29,31 +28,45 @@
 #define RAWOLAPI_H
 
 #include "function.h"
+#include "common/gadget.h"
+#include "list.h"
+#include "edit.h"
+#include "textbtn.h"
+#include "statbtn.h"
+#include "msgbox.h"
+#include "common/shapebtn.h"
+#include "gauge.h"
+#include "txtlabel.h"
+#include "checkbox.h"
+#include "colrlist.h"
+#include "cheklist.h"
+#include "drop.h"
+#include "slider.h"
+#include "common/toggle.h"
+#include "bigcheck.h"
+#include "tooltip.h"
+#include "seditdlg.h"
+#include "dialog.h"
 
+//#include "cominit.h"
 #include <stdio.h>
 
 //	From OBJBASE.H
-#define interface struct
 
 //	From RPCNDR.H
-#define DECLSPEC_UUID(x)
 
-#include <commctrl.h>
 
-// namespace WOL		//	namespace is workaround due to the use of "Server" as a global in Red Alert.
+//namespace WOL		//	namespace is workaround due to the use of "Server" as a global in Red Alert.
 //	ajw - Can't use namespaces in Watcom 10.5 it seems...
 //{
-#include "wolapi\wolapi.h"
-#define IID_DEFINED
+#include "wolapi/wolapi.h"
 //#include "wlib/wdebug.h"
-#include "wolapi\chatdefs.h"
-#include "wolapi\downloaddefs.h"
-#include "wolapi\ftpdefs.h"
+#include "wolapi/chatdefs.h"
+#include "wolapi/downloaddefs.h"
+#include "wolapi/ftpdefs.h"
 //};
-// using namespace WOL;
-#include <winerror.h>
+//using namespace WOL;
 //#include <ocidl.h>
-#include <olectl.h>
 
 //***********************************************************************************************
 //	For debugging chat defined hresults...
@@ -81,7 +94,7 @@ enum CHANNELFILTER
 #define WOLCOLORREMAP_SELFSPEAKING     PCOLOR_RED
 #define WOLCOLORREMAP_LOCALMACHINEMESS PCOLOR_REALLY_BLUE //	Color of system messages that originate locally.
 #define WOLCOLORREMAP_PAGE             PCOLOR_GOLD
-#define WOLCOLORREMAP_KICKORBAN        PCOLOR_GREEN // LTBLUE
+#define WOLCOLORREMAP_KICKORBAN        PCOLOR_GREEN //LTBLUE
 #define WOLCOLORREMAP_PUBLICMESSAGE    PCOLOR_NONE
 #define WOLCOLORREMAP_PRIVATEMESSAGE   PCOLOR_ORANGE
 
@@ -122,7 +135,7 @@ public:
     STDMETHOD_(ULONG, Release)();
 
     // IChatEvent
-    STDMETHOD(OnServerList)(HRESULT res, Server* servers);
+    STDMETHOD(OnServerList)(HRESULT res, WOLServer* servers);
     STDMETHOD(OnLogout)(HRESULT r, User* user);
     STDMETHOD(OnBusy)(HRESULT r);
     STDMETHOD(OnIdle)(HRESULT r);
@@ -157,10 +170,10 @@ public:
     STDMETHOD(OnUserFlags)(HRESULT r, LPCSTR name, unsigned int flags, unsigned int mask);
     STDMETHOD(OnChannelBan)(HRESULT r, LPCSTR name, int banned);
 
-    unsigned int GetPlayerGameIP(const char* szPlayerName) const;
+    unsigned long GetPlayerGameIP(const char* szPlayerName) const;
     void DeleteUserList(); //	Deletes from heap all users pointed to through pUserList.
     void DeleteUserIPList();
-    unsigned int GetUserIP(const char* szName) const;
+    unsigned long GetUserIP(const char* szName) const;
 
     void ActionEggSound(const char* szMessage);
 
@@ -187,7 +200,7 @@ public:
 
     bool bRequestGameStartWait;
 
-    Server* pServer; //	Server to connect to, acquired from OnServerList.
+    WOLServer* pServer; //	Server to connect to, acquired from OnServerList.
     bool bConnected; //	True when user is logged in to chat server.
     bool bJoined;    //	True when user has joined a channel.
 
@@ -225,7 +238,7 @@ protected:
     void InsertUserSorted(User* pUserNew);
 
 private:
-    int m_cRef; // Reference Count
+    long m_cRef; // Reference Count
 };
 
 //***********************************************************************************************
@@ -235,7 +248,7 @@ class RADownloadEventSink :
 {
 public:
     RADownloadEventSink();
-    virtual ~RADownloadEventSink(){};
+    virtual ~RADownloadEventSink() {};
 
     //  BEGIN_COM_MAP(RADownloadEventSink)
     //    COM_INTERFACE_ENTRY(IDownloadEvent)
@@ -267,7 +280,7 @@ public:
     bool bResumed;
 
 private:
-    int m_cRef; // Ref count
+    long m_cRef; // Ref count
 };
 
 //***********************************************************************************************
@@ -279,9 +292,9 @@ public:
     RANetUtilEventSink(WolapiObject* pOwner);
     virtual ~RANetUtilEventSink();
 
-    // BEGIN_COM_MAP(CNetUtilEventSink)
+    //BEGIN_COM_MAP(CNetUtilEventSink)
     //	COM_INTERFACE_ENTRY(INetUtilEvent)
-    // END_COM_MAP()
+    //END_COM_MAP()
 
     // IUnknown
     STDMETHOD(QueryInterface)(const IID& iid, void** ppv);
@@ -292,7 +305,7 @@ public:
 
     STDMETHOD(OnGameresSent)(HRESULT res);
     STDMETHOD(OnLadderList)(HRESULT res, Ladder* list, int totalCount, long timeStamp, int keyRung);
-    STDMETHOD(OnPing)(HRESULT res, int time, unsigned int ip, int handle);
+    STDMETHOD(OnPing)(HRESULT res, int time, unsigned long ip, int handle);
 
     void DeleteLadderList(); //	Deletes from heap all users pointed to through pUserList.
     unsigned int GetUserRank(const char* szName, bool bRankRA);
@@ -306,7 +319,7 @@ protected:
     WolapiObject* pOwner; //	Link back to the object that contains me.
 
 private:
-    int m_cRef; // Reference Count
+    long m_cRef; // Reference Count
 };
 
 //***********************************************************************************************

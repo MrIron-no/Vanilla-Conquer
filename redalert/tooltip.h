@@ -21,7 +21,7 @@
 #ifndef TOOLTIP_H
 #define TOOLTIP_H
 
-#include "Gadget.h"
+#include "gadget.h"
 
 #define TOOLTIPTEXT_MAX_LEN 100
 

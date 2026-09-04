@@ -158,6 +158,23 @@ if(NETWORKING)
     )
 endif()
 
+if(NETWORKING AND WOL)
+    list(APPEND REDALERT_NET_SRC
+        dibcompat.cpp
+        passedit.cpp
+        wol_cgam.cpp
+        wol_chat.cpp
+        wol_gsup.cpp
+        wol_logn.cpp
+        wol_main.cpp
+        wol_opt.cpp
+        wolapiob.cpp
+        wolcompat.cpp
+        woledit.cpp
+        wollobby.cpp
+    )
+endif()
+
 if(CMAKE_CONFIGURATION_TYPES)
     # Glob all the header files together to add to the project for msvc/xcode.
     # Not ideal as CMake won't notice if you add any until something else prompts a CMake run
@@ -255,6 +272,9 @@ if(BUILD_VANILLARA)
     endif()
 
     target_compile_definitions(VanillaRA PUBLIC $<$<CONFIG:Debug>:_DEBUG> ${VANILLA_DEFS})
+    if(NETWORKING AND WOL)
+        target_compile_definitions(VanillaRA PUBLIC WOLAPI_INTEGRATION)
+    endif()
     target_include_directories(VanillaRA PUBLIC ${CMAKE_SOURCE_DIR} .)
     target_link_libraries(VanillaRA commonv ${VANILLA_LIBS} ${STATIC_LIBS})
     set_target_properties(VanillaRA PROPERTIES OUTPUT_NAME vanillara)

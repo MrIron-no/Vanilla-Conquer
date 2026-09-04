@@ -81,7 +81,7 @@
 
 #ifdef WOLAPI_INTEGRATION
 //#include "WolDebug.h"
-#include "WolapiOb.h"
+#include "wolapiob.h"
 extern WolapiObject* pWolapi;
 
 bool bReconnectDialogCancelled;

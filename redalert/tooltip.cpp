@@ -1,23 +1,26 @@
-//
-// Copyright 2020 Electronic Arts Inc.
-//
-// TiberianDawn.DLL and RedAlert.dll and corresponding source code is free
-// software: you can redistribute it and/or modify it under the terms of
-// the GNU General Public License as published by the Free Software Foundation,
-// either version 3 of the License, or (at your option) any later version.
-
-// TiberianDawn.DLL and RedAlert.dll and corresponding source code is distributed
-// in the hope that it will be useful, but with permitted additional restrictions
-// under Section 7 of the GPL. See the GNU General Public License in LICENSE.TXT
-// distributed with this program. You should have received a copy of the
-// GNU General Public License along with permitted additional restrictions
-// with this program. If not, see https://github.com/electronicarts/CnC_Remastered_Collection
+/*
+**	Command & Conquer Red Alert(tm)
+**	Copyright 2025 Electronic Arts Inc.
+**
+**	This program is free software: you can redistribute it and/or modify
+**	it under the terms of the GNU General Public License as published by
+**	the Free Software Foundation, either version 3 of the License, or
+**	(at your option) any later version.
+**
+**	This program is distributed in the hope that it will be useful,
+**	but WITHOUT ANY WARRANTY; without even the implied warranty of
+**	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**	GNU General Public License for more details.
+**
+**	You should have received a copy of the GNU General Public License
+**	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 //	ToolTip.cpp
-#if (0) // PG
+
 #include "function.h"
-#include "ToolTip.h"
-#include "IconList.h"
+#include "tooltip.h"
+#include "iconlist.h"
 
 //#include "WolDebug.h"
 
@@ -49,8 +52,7 @@ ToolTipClass::ToolTipClass(GadgetClass* pGadget,
         *szTip = 0;
 
     Set_Font(TypeFontPtr);
-    Fancy_Text_Print(
-        TXT_NONE, 0, 0, TBLACK, TBLACK, TPF_TYPE); //	Required before String_Pixel_Width() call, for god's sake.
+    Fancy_Text_Print(TXT_NONE, 0, 0, GadgetClass::Get_Color_Scheme(), TBLACK, TPF_TYPE); //	Required before String_Pixel_Width() call, for god's sake.
     wShow = String_Pixel_Width(szTip) + 2;
     hShow = 11;
 
@@ -80,7 +82,7 @@ ToolTipClass* ToolTipClass::GetToolTipHit()
 }
 
 //***********************************************************************************************
-bool ToolTipClass::bGadgetHit()
+bool ToolTipClass::bGadgetHit() const
 {
     //	Returns true if the mouse is currently over the gadget to which *this is bound.
     int x = Get_Mouse_X();
@@ -133,11 +135,7 @@ void ToolTipClass::Show()
                 bLastShowNoText = true;
                 return;
             }
-            Fancy_Text_Print(TXT_NONE,
-                             0,
-                             0,
-                             TBLACK,
-                             TBLACK,
+            Fancy_Text_Print(TXT_NONE, 0, 0, GadgetClass::Get_Color_Scheme(), TBLACK,
                              TPF_TYPE); //	Required before String_Pixel_Width() call, for god's sake.
             wShowUse = String_Pixel_Width(szTipUse) + 2;
             if (bRightAlign)
@@ -154,13 +152,11 @@ void ToolTipClass::Show()
         Hide_Mouse();
         SaveSurfaceRect(xShowUse, yShowUse, wShowUse, hShow, pSaveRect, WINDOW_MAIN);
         //	Draw text.
-        // Simple_Text_Print( szTipUse, xShowUse, yShowUse, GadgetClass::Get_Color_Scheme(), ColorRemaps[ PCOLOR_BROWN
-        // ].Color, TPF_TYPE ); //TPF_DROPSHADOW );
+        //Simple_Text_Print( szTipUse, xShowUse, yShowUse, GadgetClass::Get_Color_Scheme(), ColorRemaps[ PCOLOR_BROWN ].Color, TPF_TYPE ); //TPF_DROPSHADOW );
         Simple_Text_Print(
-            szTipUse, xShowUse, yShowUse, GadgetClass::Get_Color_Scheme(), BLACK, TPF_TYPE); // TPF_DROPSHADOW );
+            szTipUse, xShowUse, yShowUse, GadgetClass::Get_Color_Scheme(), BLACK, TPF_TYPE); //TPF_DROPSHADOW );
         //	Draw bounding rect.
-        //		LogicPage->Draw_Rect( xShowUse, yShowUse, xShowUse + wShowUse - 1, yShowUse + hShow - 1, ColorRemaps[
-        //PCOLOR_GOLD ].Color );
+        //		LogicPage->Draw_Rect( xShowUse, yShowUse, xShowUse + wShowUse - 1, yShowUse + hShow - 1, ColorRemaps[ PCOLOR_GOLD ].Color );
         Draw_Box(xShowUse, yShowUse, wShowUse, hShow, BOXSTYLE_BOX, false);
         Show_Mouse();
         bShowing = true;
@@ -192,9 +188,10 @@ void ToolTipClass::Unshow()
             //				bShowing = false;
             //				return;
             //			}
-            //			Fancy_Text_Print( TXT_NONE, 0, 0, TBLACK, TBLACK, TPF_TYPE );	//	Required before
-            //String_Pixel_Width() call, for god's sake. 			wShowUse = String_Pixel_Width( szTipUsed ) + 2; 			if( bRightAlign
-            //) 				xShowUse -= wShowUse;
+            //			Fancy_Text_Print(TXT_NONE, 0, 0, GadgetClass::Get_Color_Scheme(), TBLACK, TPF_TYPE );	//	Required before String_Pixel_Width() call, for god's sake.
+            //			wShowUse = String_Pixel_Width( szTipUsed ) + 2;
+            //			if( bRightAlign )
+            //				xShowUse -= wShowUse;
             xShowUse = xLastShow;
             yShowUse = yLastShow;
             wShowUse = wLastShow;
@@ -285,4 +282,3 @@ bool RestoreSurfaceRect(int xRect, int yRect, int wRect, int hRect, const char* 
         return false;
     }
 }
-#endif

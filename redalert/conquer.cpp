@@ -66,6 +66,9 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #include "function.h"
+#ifdef WOLAPI_INTEGRATION
+#include "wolapiob.h"
+#endif
 #include "msgbox.h"
 #include "keyframe.h"
 #include "language.h"

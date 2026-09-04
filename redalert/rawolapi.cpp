@@ -1,17 +1,20 @@
-//
-// Copyright 2020 Electronic Arts Inc.
-//
-// TiberianDawn.DLL and RedAlert.dll and corresponding source code is free
-// software: you can redistribute it and/or modify it under the terms of
-// the GNU General Public License as published by the Free Software Foundation,
-// either version 3 of the License, or (at your option) any later version.
-
-// TiberianDawn.DLL and RedAlert.dll and corresponding source code is distributed
-// in the hope that it will be useful, but with permitted additional restrictions
-// under Section 7 of the GPL. See the GNU General Public License in LICENSE.TXT
-// distributed with this program. You should have received a copy of the
-// GNU General Public License along with permitted additional restrictions
-// with this program. If not, see https://github.com/electronicarts/CnC_Remastered_Collection
+/*
+**	Command & Conquer Red Alert(tm)
+**	Copyright 2025 Electronic Arts Inc.
+**
+**	This program is free software: you can redistribute it and/or modify
+**	it under the terms of the GNU General Public License as published by
+**	the Free Software Foundation, either version 3 of the License, or
+**	(at your option) any later version.
+**
+**	This program is distributed in the hope that it will be useful,
+**	but WITHOUT ANY WARRANTY; without even the implied warranty of
+**	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**	GNU General Public License for more details.
+**
+**	You should have received a copy of the GNU General Public License
+**	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifdef WOLAPI_INTEGRATION
 
@@ -19,15 +22,14 @@
 //	Definitions for RAChatEventSink, RADownloadEventSink, RANetUtilEventSink.
 //	ajw 07/10/98
 
-#include "RAWolapi.h"
-#define IID_DEFINED
-#include "wolapi\wolapi_i.c"
-#include "WolapiOb.h"
-#include "WolStrng.h"
-#include "Wol_gsup.h"
-#include "wolapi\netutildefs.h"
+#include "rawolapi.h"
+#include "wolapiob.h"
+#include "wolstrng.h"
+#include "wol_gsup.h"
+#include "wolapi/netutildefs.h"
 
-#include "WolDebug.h"
+#include "woldebug.h"
+#include "common/base64.h"
 
 bool operator<(const User& u1, const User& u2);
 
@@ -114,11 +116,11 @@ ULONG __stdcall RAChatEventSink::Release()
 
 //***********************************************************************************************
 //***********************************************************************************************
-STDMETHODIMP RAChatEventSink::OnServerList(HRESULT hRes, Server* pServerHead)
+STDMETHODIMP RAChatEventSink::OnServerList(HRESULT hRes, WOLServer* pServerHead)
 {
-    // strcpy( szLadderServerHost, "games.westwood.com" );
-    // iLadderServerPort = 3840;
-    // strcpy( szGameResServerHost, "games.westwood.com" );
+    //strcpy( szLadderServerHost, "games.westwood.com" );
+    //iLadderServerPort = 3840;
+    //strcpy( szGameResServerHost, "games.westwood.com" );
 
     //	debugprint( ">>> OnServerList got: %i ", hRes );
     DebugChatDef(hRes);
@@ -132,7 +134,7 @@ STDMETHODIMP RAChatEventSink::OnServerList(HRESULT hRes, Server* pServerHead)
         while (pServerHead) {
             //	Copy the first IRC Server to use in the RequestConnection() call.
             if (!pServer && (strcmp((char*)pServerHead->connlabel, "IRC") == 0)) {
-                pServer = new Server;
+                pServer = new WOLServer;
                 *pServer = *pServerHead;
             } else if (!*pOwner->szLadderServerHost && (strcmp((char*)pServerHead->connlabel, "LAD") == 0)) {
                 //				debugprint( "Scanning '%s'\n", (char*)pServerHead->conndata );
@@ -142,8 +144,7 @@ STDMETHODIMP RAChatEventSink::OnServerList(HRESULT hRes, Server* pServerHead)
                 strcpy(pOwner->szLadderServerHost, token);
                 token = strtok(NULL, ";");
                 pOwner->iLadderServerPort = atoi(token);
-                //				debugprint( "Ladder is at: %s, port %i\n", pOwner->szLadderServerHost,
-                //pOwner->iLadderServerPort );
+                //				debugprint( "Ladder is at: %s, port %i\n", pOwner->szLadderServerHost, pOwner->iLadderServerPort );
             } else if (!*pOwner->szGameResServerHost1 && (strcmp((char*)pServerHead->connlabel, "GAM") == 0)) {
                 //	This is the Red Alert game results port.
                 char* token;
@@ -152,8 +153,7 @@ STDMETHODIMP RAChatEventSink::OnServerList(HRESULT hRes, Server* pServerHead)
                 strcpy(pOwner->szGameResServerHost1, token);
                 token = strtok(NULL, ";");
                 pOwner->iGameResServerPort1 = atoi(token);
-                //				debugprint( "GameRes is at: %s, port %i\n", pOwner->szGameResServerHost,
-                //pOwner->iGameResServerPort );
+                //				debugprint( "GameRes is at: %s, port %i\n", pOwner->szGameResServerHost, pOwner->iGameResServerPort );
             } else if (!*pOwner->szGameResServerHost2 && (strcmp((char*)pServerHead->connlabel, "GAM") == 0)) {
                 //	This is the Aftermath game results port.
                 char* token;
@@ -162,8 +162,7 @@ STDMETHODIMP RAChatEventSink::OnServerList(HRESULT hRes, Server* pServerHead)
                 strcpy(pOwner->szGameResServerHost2, token);
                 token = strtok(NULL, ";");
                 pOwner->iGameResServerPort2 = atoi(token);
-                //				debugprint( "GameRes is at: %s, port %i\n", pOwner->szGameResServerHost,
-                //pOwner->iGameResServerPort );
+                //				debugprint( "GameRes is at: %s, port %i\n", pOwner->szGameResServerHost, pOwner->iGameResServerPort );
             }
             pServerHead = pServerHead->next;
         }
@@ -243,8 +242,7 @@ STDMETHODIMP RAChatEventSink::OnLogout(HRESULT hRes, User* pUser)
     if (hRes == S_OK) {
         //	Someone has been logged out by the chat server due to inactivity.
         //	Fake a call to OnChannelLeave(), as the processing is identical.
-        //		debugprint( "OnLogout calling OnChannelLeave for %s, owner=%i\n", (char*)pUser->name, ( pUser->flags &
-        //CHAT_USER_CHANNELOWNER ) );
+        //		debugprint( "OnLogout calling OnChannelLeave for %s, owner=%i\n", (char*)pUser->name, ( pUser->flags & CHAT_USER_CHANNELOWNER ) );
         OnChannelLeave(S_OK, NULL, pUser);
     }
 
@@ -347,8 +345,9 @@ STDMETHODIMP RAChatEventSink::OnChannelModify(HRESULT, Channel*)
 STDMETHODIMP RAChatEventSink::OnChannelJoin(HRESULT hRes, Channel* /*pChannel*/, User* pUser)
 {
     //	if( SUCCEEDED( hRes ) )
-    //		debugprint( ">>> OnChannelJoin got: channel '%s', user '%s', %i ", (char*)pChannel->name, (char*)pUser->name,
-    //hRes ); 	else 		debugprint( ">>> OnChannelJoin got: %i ", hRes );
+    //		debugprint( ">>> OnChannelJoin got: channel '%s', user '%s', %i ", (char*)pChannel->name, (char*)pUser->name, hRes );
+    //	else
+    //		debugprint( ">>> OnChannelJoin got: %i ", hRes );
     DebugChatDef(hRes);
 
     //	//	Special case - ignore OnChannelJoin when waiting for a UserList.
@@ -365,8 +364,7 @@ STDMETHODIMP RAChatEventSink::OnChannelJoin(HRESULT hRes, Channel* /*pChannel*/,
             bRequestChannelJoinWait = false;
             if (pUserList) {
                 //	Should never happen.
-                //				debugprint( "pUserList should be NULL (as I am the joiner)!!! Deleting user list...\n"
-                //);
+                //				debugprint( "pUserList should be NULL (as I am the joiner)!!! Deleting user list...\n" );
                 DeleteUserList();
             }
         } else {
@@ -374,16 +372,14 @@ STDMETHODIMP RAChatEventSink::OnChannelJoin(HRESULT hRes, Channel* /*pChannel*/,
                 if (pOwner->pGSupDlg
                     && (pOwner->pGSupDlg->bHostSayGo || pOwner->pGSupDlg->bHostWaitingForGoTrigger
                         || pOwner->pGSupDlg->bExitForGameTrigger || iGameID)) {
-                    //	A game has this moment entered the "must start" phase. We can ignore the fact that others are
-                    //leaving the channel.
+                    //	A game has this moment entered the "must start" phase. We can ignore the fact that others are leaving the channel.
                     //					debugprint( "Ignoring leave because game is starting.\n" );
                     return S_OK;
                 }
             }
             //	Add user to our current channel users list.
             if (!pUserList) {
-                //				debugprint( "pUserList is null in OnChannelJoin - ignoring %s join... \n", (char*)pUser->name
-                //);
+                //				debugprint( "pUserList is null in OnChannelJoin - ignoring %s join... \n", (char*)pUser->name );
                 return S_OK;
             }
             //			if( !pUserList )
@@ -493,16 +489,14 @@ STDMETHODIMP RAChatEventSink::OnChannelLeave(HRESULT hRes, Channel*, User* pUser
         } else {
             //	Remove user from our current channel users list.
             if (!pUserList) {
-                //				debugprint( "pUserList is null in OnChannelLeave - ignoring %s leave... \n",
-                //(char*)pUser->name );
+                //				debugprint( "pUserList is null in OnChannelLeave - ignoring %s leave... \n", (char*)pUser->name );
                 return S_OK;
             }
             if (pOwner->CurrentLevel == WOL_LEVEL_INGAMECHANNEL) {
                 if (pOwner->pGSupDlg
                     && (pOwner->pGSupDlg->bHostSayGo || pOwner->pGSupDlg->bHostWaitingForGoTrigger
                         || pOwner->pGSupDlg->bExitForGameTrigger || iGameID)) {
-                    //	A game has this moment entered the "must start" phase. We must ignore the fact that others are
-                    //leaving the channel.
+                    //	A game has this moment entered the "must start" phase. We must ignore the fact that others are leaving the channel.
                     //					debugprint( "Ignoring leave because game is starting.\n" );
                     return S_OK;
                 }
@@ -518,8 +512,7 @@ STDMETHODIMP RAChatEventSink::OnChannelLeave(HRESULT hRes, Channel*, User* pUser
                         pUserList = pUserSearch->next;
                         if (!pUserList) {
                             //	This means all entries were removed. Can't happen, as you are still there.
-                            //							debugprint( "This means all entries were removed. Can't happen, as you are
-                            //still there. (OnChannelLeave)\n" );
+                            //							debugprint( "This means all entries were removed. Can't happen, as you are still there. (OnChannelLeave)\n" );
                             Fatal("This means all entries were removed. Can't happen, as you are still there. "
                                   "(OnChannelLeave)\n");
                         }
@@ -714,28 +707,24 @@ STDMETHODIMP RAChatEventSink::OnChannelList(HRESULT, Channel* pChannelListIn)
 {
     if (bIgnoreChannelLists) //	Response to channel lists has been temporarily turned off.
     {
-        //		debugprint( ">>> IGNORED OnChannelList, filter = %i, WO's LastUpdateChannelCallLevel = %i \n",
-        //ChannelFilter, pOwner->LastUpdateChannelCallLevel );
+        //		debugprint( ">>> IGNORED OnChannelList, filter = %i, WO's LastUpdateChannelCallLevel = %i \n", ChannelFilter, pOwner->LastUpdateChannelCallLevel );
         return S_OK;
     }
 
     //	Special case for modal GetLobbyChannels(). Because we want to be sure this OnChannelList is one that was caused
     //	by a Request for gametype 0, and not one arriving from an earlier Request for games.
-    //	This OnChannelList might not actually match the Request in GetLobbyChannels(), but as long as it's type 0 it'll
-    //do.
+    //	This OnChannelList might not actually match the Request in GetLobbyChannels(), but as long as it's type 0 it'll do.
     if (bRequestChannelListForLobbiesWait) {
         if (pChannelListIn && pChannelListIn->type != 0) {
             //			debugprint( ">>> IGNORED OnChannelList, bRequestChannelListForLobbiesWait if\n" );
             return S_OK;
         }
         //	Note: if no channels in list, can't tell what kind of Request call gave us this list.
-        //	(In our case assume it was the one asking for lobbies and allow to fail later naturally due to no lobbies
-        //available.)
+        //	(In our case assume it was the one asking for lobbies and allow to fail later naturally due to no lobbies available.)
     }
 
     DeleteChannelList();
-    //	debugprint( ">>> OnChannelList, filter = %i, WO's LastUpdateChannelCallLevel = %i \n", ChannelFilter,
-    //pOwner->LastUpdateChannelCallLevel );
+    //	debugprint( ">>> OnChannelList, filter = %i, WO's LastUpdateChannelCallLevel = %i \n", ChannelFilter, pOwner->LastUpdateChannelCallLevel );
 
     int iLobbyCur = iChannelLobbyNumber((unsigned char*)pOwner->szChannelNameCurrent);
 
@@ -897,84 +886,11 @@ extern bool WOL_Download_Dialog(IDownload* pDownload, RADownloadEventSink* pDown
 //***********************************************************************************************
 bool RAChatEventSink::DownloadUpdates(Update* pUpdateList, int iUpdates)
 {
-    //	First we create a Download and Download Sink interface object, like Chat and ChatSink.
-    bool bReturn = true;
-    //	This is all like WolapiObject::bSetupCOMStuff().
-    // debugprint( "Do all the COM stuff.\n" );
-    IDownload* pDownload;
-    CoCreateInstance(CLSID_Download, NULL, CLSCTX_INPROC_SERVER, IID_IDownload, (void**)&pDownload);
-    _ASSERTE(pDownload);
-    RADownloadEventSink* pDownloadSink = new RADownloadEventSink();
-    pDownloadSink->AddRef();
-    IConnectionPoint* pConnectionPoint = NULL;
-    IConnectionPointContainer* pContainer = NULL;
-    HRESULT hRes = pDownload->QueryInterface(IID_IConnectionPointContainer, (void**)&pContainer);
-    _ASSERTE(SUCCEEDED(hRes));
-    hRes = pContainer->FindConnectionPoint(IID_IDownloadEvent, &pConnectionPoint);
-    _ASSERTE(SUCCEEDED(hRes));
-    DWORD dwDownloadAdvise;
-    hRes = pConnectionPoint->Advise((IDownloadEvent*)pDownloadSink, &dwDownloadAdvise);
-    _ASSERTE(SUCCEEDED(hRes));
-    //	Presumably the above calls will succeed, because they did so when we did bSetupComStuff().
-
-    pContainer->Release();
-    pConnectionPoint->Release();
-
-    Update* pUpdate = pUpdateList;
-    int iUpdateCurrent = 0;
-    //	Save current directory.
-    char szCurDirSave[_MAX_PATH];
-    ::GetCurrentDirectory(_MAX_PATH, szCurDirSave);
-    while (pUpdate) {
-        ++iUpdateCurrent;
-        char szTitle[120];
-        sprintf(szTitle, TXT_WOL_DOWNLOADING, iUpdateCurrent, iUpdates);
-        char fullpath[_MAX_PATH];
-        sprintf(fullpath, "%s\\%s", pUpdate->patchpath, pUpdate->patchfile);
-        //	Downloading in WOLAPI is in a state of disarray somewhat.
-        //	Make sure the destination directory exists, and make it the current directory during the download.
-        // debugprint( "Switching to %s dir.\n", (char*)pUpdate->localpath );
-        if (!::SetCurrentDirectory((char*)pUpdate->localpath)) {
-            //	Create the destination directory.
-            //			debugprint( "Creating dir.\n" );
-            ::CreateDirectory((char*)pUpdate->localpath, NULL);
-            ::SetCurrentDirectory((char*)pUpdate->localpath);
-        }
-        //	Note: Unknown what the reg key value is actually used for...
-        // debugprint( "Asking to download %s to %s. Server '%s', login '%s', password '%s'\n", fullpath,
-        // (char*)pUpdate->patchfile, 		   (char*)pUpdate->server, (char*)pUpdate->login, (char*)pUpdate->password );
-        pDownload->DownloadFile((char*)pUpdate->server,
-                                (char*)pUpdate->login,
-                                (char*)pUpdate->password,
-                                fullpath,
-                                (char*)pUpdate->patchfile,
-                                Game_Registry_Key());
-        //		debugprint( "Call WOL_Download_Dialog()\n" );
-        if (!WOL_Download_Dialog(pDownload, pDownloadSink, szTitle)) {
-            bReturn = false;
-            break;
-        }
-        pUpdate = pUpdate->next;
-    }
-    ::SetCurrentDirectory(szCurDirSave);
-
-    //	Undo all the COM stuff.
-    // debugprint( "Undo all the COM stuff.\n" );
-    pConnectionPoint = NULL;
-    pContainer = NULL;
-    hRes = pDownload->QueryInterface(IID_IConnectionPointContainer, (void**)&pContainer);
-    _ASSERTE(SUCCEEDED(hRes));
-    hRes = pContainer->FindConnectionPoint(IID_IDownloadEvent, &pConnectionPoint);
-    _ASSERTE(SUCCEEDED(hRes));
-    pConnectionPoint->Unadvise(dwDownloadAdvise);
-
-    pContainer->Release();
-    pConnectionPoint->Release();
-
-    pDownload->Release();
-    pDownloadSink->Release(); //	This results in pDownloadSink deleting itself for us.
-
-    return bReturn;
+    //	Patch downloads went through the WOL FTP service, which no longer exists.
+    //	The lobby service never sends an update list, so this is not reachable.
+    (void)pUpdateList;
+    (void)iUpdates;
+    return false;
 }
 
 //***********************************************************************************************
@@ -1261,7 +1177,7 @@ STDMETHODIMP RAChatEventSink::OnGameStart(HRESULT hRes, Channel*, User* pUserIn,
 }
 
 //***********************************************************************************************
-unsigned int RAChatEventSink::GetPlayerGameIP(const char* szPlayerName) const
+unsigned long RAChatEventSink::GetPlayerGameIP(const char* szPlayerName) const
 {
     //	Returns ipaddr value of player if found in pGameUserList, else 0.
     User* pUser = pGameUserList;
@@ -1373,7 +1289,7 @@ void RAChatEventSink::DeleteUserIPList()
 }
 
 //***********************************************************************************************
-unsigned int RAChatEventSink::GetUserIP(const char* szName) const
+unsigned long RAChatEventSink::GetUserIP(const char* szName) const
 {
     //	Looks in pUserIPList for the ipaddr of user with name szName.
     //	This is used only while in game channels.
@@ -1414,10 +1330,8 @@ STDMETHODIMP RAChatEventSink::OnUserFlags(HRESULT hRes, LPCSTR name, unsigned in
         if (pOwner->pGSupDlg
             && (pOwner->pGSupDlg->bHostSayGo || pOwner->pGSupDlg->bHostWaitingForGoTrigger
                 || pOwner->pGSupDlg->bExitForGameTrigger || iGameID)) {
-            //	A game has this moment entered the "must start" phase. We must ignore the fact that others are leaving
-            //the channel.
-            //			debugprint( "Ignoring OnUserFlags because game is starting.\n" );		//	(Shouldn't ever
-            //happen.)
+            //	A game has this moment entered the "must start" phase. We must ignore the fact that others are leaving the channel.
+            //			debugprint( "Ignoring OnUserFlags because game is starting.\n" );		//	(Shouldn't ever happen.)
             return S_OK;
         }
     }
@@ -1727,7 +1641,7 @@ STDMETHODIMP RANetUtilEventSink::OnLadderList(HRESULT hRes,
 }
 
 //***********************************************************************************************
-STDMETHODIMP RANetUtilEventSink::OnPing(HRESULT hRes, int time, unsigned int ip, int /*handle*/)
+STDMETHODIMP RANetUtilEventSink::OnPing(HRESULT hRes, int time, unsigned long ip, int /*handle*/)
 {
     if (pOwner->bDoingDisconnectPinging) {
         //		debugprint( ">>> OnPing got : ip %i, time %i, ", ip, time );

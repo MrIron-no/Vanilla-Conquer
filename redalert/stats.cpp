@@ -158,7 +158,7 @@ void* PacketLater = NULL;
 //#include "WolDebug.h"
 
 #ifdef WOLAPI_INTEGRATION
-#include "WolapiOb.h"
+#include "wolapiob.h"
 extern WolapiObject* pWolapi;
 
 extern bool bReconnectDialogCancelled;

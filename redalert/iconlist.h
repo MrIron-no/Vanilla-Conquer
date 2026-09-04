@@ -32,6 +32,7 @@
 
 #include "function.h"
 #include "vector.h"
+#include "list.h"
 
 enum ICONKIND
 {
@@ -87,7 +88,7 @@ public:
                   TextPrintType flags,
                   void const* up,
                   void const* down,
-                  bool bResponsibleForStringAlloc = FALSE,
+                  bool bResponsibleForStringAlloc = false,
                   int iSelectionType = 1,
                   int iMaxItemsSaved = 0);
     //		IconListClass( const IconListClass& list );

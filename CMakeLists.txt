@@ -26,6 +26,7 @@ option(BUILD_VANILLARA "Build Red Alert executable." ON)
 option(MAP_EDITORTD "Include internal scenario editor in Tiberian Dawn build." OFF)
 option(MAP_EDITORRA "Include internal scenario editor in Red Alert build." OFF)
 option(NETWORKING "Enable network play." ON)
+option(WOL "Enable the Westwood Online style internet lobby (Red Alert)." ON)
 option(WIN9X "Enable support for Windows 95/98/ME." OFF)
 option(DSOUND "Enable DirectSound audio. (deprecated)" OFF)
 option(DDRAW "Enable DirectDraw video backend. (deprecated)" OFF)
@@ -66,6 +67,7 @@ add_feature_info(VanillaRA BUILD_VANILLARA "Red Alert executable")
 add_feature_info(MapEditorTD MAP_EDITORTD "Include internal scenario editor in VanillaTD")
 add_feature_info(MapEditorRA MAP_EDITORRA "Include internal scenario editor in VanillaRA")
 add_feature_info(Networking NETWORKING "Networking support")
+add_feature_info(WOL WOL "Internet lobby (Red Alert)")
 add_feature_info(Tests BUILD_TESTS "Unit tests")
 add_feature_info(Tools BUILD_TOOLS "Mod developer tools")
 
@@ -124,6 +126,34 @@ if(NETWORKING)
     if(WIN32)
         list(APPEND VANILLA_LIBS ws2_32)
     endif()
+endif()
+
+if(WOL AND NOT NETWORKING)
+    message(WARNING "Westwood Online lobby requires NETWORKING; disabling WOL.")
+    set(WOL OFF)
+endif()
+
+if(WOL)
+    # WebSocket + TLS client and JSON for the internet lobby (redalert/wollobby.cpp).
+    include(FetchContent)
+    set(USE_TLS ON CACHE BOOL "" FORCE)
+    set(USE_ZLIB OFF CACHE BOOL "" FORCE)
+    if(NOT APPLE AND NOT WIN32)
+        set(USE_OPEN_SSL ON CACHE BOOL "" FORCE)
+    endif()
+    set(IXWEBSOCKET_INSTALL OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(ixwebsocket
+        GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
+        GIT_TAG v11.4.6
+        GIT_SHALLOW TRUE)
+    set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
+    set(JSON_Install OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.12.0
+        GIT_SHALLOW TRUE)
+    FetchContent_MakeAvailable(ixwebsocket nlohmann_json)
+    list(APPEND VANILLA_LIBS ixwebsocket::ixwebsocket nlohmann_json::nlohmann_json)
 endif()
 
 if(SDL1)

@@ -20,8 +20,10 @@
 //					Still - I can't believe there isn't a set of dialog classes in here already.
 //	ajw 07/21/98
 
-#include "SEditDlg.h"
-#include "WOLEdit.h"
+#include "seditdlg.h"
+#include "woledit.h"
+#include "textbtn.h"
+#include "wolcompat.h"
 
 extern bool cancel_current_msgbox;
 bool disable_current_msgbox = false;
@@ -257,7 +259,7 @@ const char* SimpleEditDlgClass::Show()
         ** we need to redraw.
         */
         if (AllSurfaces.SurfacesRestored) {
-            AllSurfaces.SurfacesRestored = FALSE;
+            AllSurfaces.SurfacesRestored = false;
             display = true;
         }
 
