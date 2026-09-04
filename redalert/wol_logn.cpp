@@ -22,6 +22,7 @@
 //	ajw 07/16/98
 
 #include "function.h"
+#include "common/framelimit.h"
 
 #include "iconlist.h"
 #include "wolapiob.h"
@@ -304,8 +305,10 @@ int WOL_Login_Dialog(WolapiObject* pWO)
         //	Force mouse visible, as some beta testers report unexplicable disappearing cursors.
         while (Get_Mouse_State())
             Show_Mouse();
-        //	Be nice to other apps.
-        Sleep(50);
+        //	Present the frame and pace the loop. The original drew straight to a
+        //	DirectDraw surface and only needed to yield here; the portable
+        //	backends render nothing until the frame limiter flips the page.
+        Frame_Limiter();
 
         /*
 		**	Get user input.
@@ -480,9 +483,25 @@ int WOL_Login_Dialog(WolapiObject* pWO)
 				break;
 			}
 */
-        case (LISTBOX_NICKS | KN_BUTTON):
-            strcpy(szNameBuffer, NickList.Get_Item(NickList.Current_Index()));
-            strcpy(szPassBuffer, NickList.Get_Item_ExtraDataString(NickList.Current_Index()));
+        case (LISTBOX_NICKS | KN_BUTTON): {
+            //	The nick list is empty until a login has been saved, and clicking
+            //	an empty list still reports a selection. Originally unreachable,
+            //	because web registration left this dialog before it could be
+            //	shown with no nicks in it.
+            if (NickList.Count() == 0) {
+                break;
+            }
+
+            const char* nick = NickList.Get_Item(NickList.Current_Index());
+            if (nick == nullptr) {
+                break;
+            }
+
+            const char* pass = NickList.Get_Item_ExtraDataString(NickList.Current_Index());
+            strncpy(szNameBuffer, nick, sizeof(szNameBuffer) - 1);
+            szNameBuffer[sizeof(szNameBuffer) - 1] = '\0';
+            strncpy(szPassBuffer, pass != nullptr ? pass : "", sizeof(szPassBuffer) - 1);
+            szPassBuffer[sizeof(szPassBuffer) - 1] = '\0';
             NameEdit.Flag_To_Redraw();
             PassEdit.Flag_To_Redraw();
             //	Because the password is mangled, if the user begins to edit it now, we clear it.
@@ -492,6 +511,7 @@ int WOL_Login_Dialog(WolapiObject* pWO)
             PassEdit.bClearOnNextSetFocus = true;
             //				display = true;
             break;
+        }
 
         case (BUTTON_SAVECHECK | KN_BUTTON):
             break;

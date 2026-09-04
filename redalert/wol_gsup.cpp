@@ -20,6 +20,7 @@
 
 #include "wol_gsup.h"
 #include "function.h"
+#include "common/framelimit.h"
 #include "iconlist.h"
 #include <time.h>
 #include "wolstrng.h"
@@ -545,7 +546,7 @@ RESULT_WOLGSUP WOL_GameSetupDialog::Show()
     bool bRetractHouseDropDown = false;
 
     if (!pWO->OnEnteringGameSetup())                                //	Gets a userlist setup, among other things.
-        strcpy(szNameOfHostWhoJustBailedOnUs, TXT_WOL_THEGAMEHOST); //	Will cause immediate exit.
+        Copy_Bailed_Host_Name(TXT_WOL_THEGAMEHOST); //	Will cause immediate exit.
 
     //	If I'm not already listed with a color, give myself a color.
     //	(I may have already received my assigned color from the game host.)
@@ -1162,8 +1163,10 @@ RESULT_WOLGSUP WOL_GameSetupDialog::Show()
         //	Force mouse visible, as some beta testers report unexplicable disappearing cursors.
         while (Get_Mouse_State())
             Show_Mouse();
-        //	Be nice to other apps.
-        Sleep(50);
+        //	Present the frame and pace the loop. The original drew straight to a
+        //	DirectDraw surface and only needed to yield here; the portable
+        //	backends render nothing until the frame limiter flips the page.
+        Frame_Limiter();
 
         //.....................................................................
         //	Get user input
@@ -2913,7 +2916,7 @@ void WOL_GameSetupDialog::OnGuestLeave(User* pUser)
     //	pUser is about to leave but is still in our player list.
     if (pUser->flags & CHAT_USER_CHANNELOWNER) {
         //	Host is leaving the channel. We must be a guest, and so must leave also. This will trigger exit.
-        strcpy(szNameOfHostWhoJustBailedOnUs, (char*)pUser->name);
+        Copy_Bailed_Host_Name((char*)pUser->name);
     } else {
         ClearAllAccepts();
     }
@@ -3321,7 +3324,7 @@ void WOL_GameSetupDialog::TriggerGameStart(char* szGoMessage)
                 bExitForGameTrigger = false;
                 *szTriggerGameStartInfo = 0;
                 //	Trigger the "our host just left the channel" code...
-                strcpy(szNameOfHostWhoJustBailedOnUs, szHostName);
+                Copy_Bailed_Host_Name(szHostName);
                 return;
             }
             //	Wait for download from game host.
@@ -3331,7 +3334,7 @@ void WOL_GameSetupDialog::TriggerGameStart(char* szGoMessage)
                 bExitForGameTrigger = false;
                 *szTriggerGameStartInfo = 0;
                 //	Trigger the "our host just left the channel" code...
-                strcpy(szNameOfHostWhoJustBailedOnUs, szHostName);
+                Copy_Bailed_Host_Name(szHostName);
                 return;
             }
             Scen.Scenario = Session.Options.ScenarioIndex;

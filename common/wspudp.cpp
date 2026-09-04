@@ -496,6 +496,16 @@ int UDPInterfaceClass::Message_Handler(HWND, UINT message, UINT, LONG lParam)
 #else
 int UDPInterfaceClass::Message_Handler()
 {
+    /*
+    ** The transport can exist before its socket has been opened. The internet
+    ** lobby creates the transport up front but only calls Open_Socket() once a
+    ** game actually starts, so there is nothing to service until then. Without
+    ** this the fd_set calls below are handed INVALID_SOCKET.
+    */
+    if (Socket == INVALID_SOCKET) {
+        return 0;
+    }
+
     struct sockaddr_in addr;
     int rc;
     socklen_t addr_len;

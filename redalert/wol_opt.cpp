@@ -22,6 +22,7 @@
 //	ajw 09/1/98
 
 #include "function.h"
+#include "common/framelimit.h"
 
 #include "iconlist.h"
 #include "wolapiob.h"
@@ -213,8 +214,10 @@ bool WOL_Options_Dialog(WolapiObject* pWO, bool bCalledFromGame)
         //	Force mouse visible, as some beta testers report unexplicable disappearing cursors.
         while (Get_Mouse_State())
             Show_Mouse();
-        //	Be nice to other apps.
-        Sleep(50);
+        //	Present the frame and pace the loop. The original drew straight to a
+        //	DirectDraw surface and only needed to yield here; the portable
+        //	backends render nothing until the frame limiter flips the page.
+        Frame_Limiter();
 
         /*
 		**	Get user input.

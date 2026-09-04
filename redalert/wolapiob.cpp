@@ -877,8 +877,8 @@ HRESULT WolapiObject::ChannelJoin(const char* szChannelName, const char* szKey)
     //	Used for CHAT channels (or lobbies) only. Channel type is set to 0.
     Channel ChannelTemp;
     memset(&ChannelTemp, 0, sizeof(ChannelTemp));
-    strcpy((char*)ChannelTemp.name, szChannelName);
-    strcpy((char*)ChannelTemp.key, szKey);
+    strncpy((char*)ChannelTemp.name, szChannelName, sizeof(ChannelTemp.name) - 1);
+    strncpy((char*)ChannelTemp.key, szKey, sizeof(ChannelTemp.key) - 1);
     return ChannelJoin(&ChannelTemp);
 }
 

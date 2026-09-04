@@ -282,6 +282,16 @@ namespace
         }
 
         /*
+        ** The server only marks CHAT_USER_MYSELF on request responses, not on
+        ** the broadcast events, so our own join/leave has to be recognised by
+        ** name. The sinks branch entirely on that flag.
+        */
+        bool Is_Me(const unsigned char* name) const
+        {
+            return name != nullptr && !MyName.empty() && strcasecmp((const char*)name, MyName.c_str()) == 0;
+        }
+
+        /*
     ** Opens the socket and sends hello. Completion arrives through Pump().
     */
         void Connect(const char* url)
@@ -716,7 +726,7 @@ namespace
             }
             if (ev == "channel_joined") {
                 User u = User_From_JSON(j["user"]);
-                if (u.flags & CHAT_USER_MYSELF) {
+                if ((u.flags & CHAT_USER_MYSELF) || Is_Me(u.name)) {
                     return; // our own join is reported through the response
                 }
                 Channel c = Channel_From_JSON(j["channel"]);
@@ -725,6 +735,9 @@ namespace
             } else if (ev == "channel_left") {
                 User u = User_From_JSON(j["user"]);
                 Channel c = Channel_From_JSON(j["channel"]);
+                if (Is_Me(u.name)) {
+                    u.flags |= CHAT_USER_MYSELF;
+                }
                 if (u.flags & CHAT_USER_MYSELF) {
                     // Removed by the server (kick, ban): the response path did not run.
                     memset(&CurrentChannel, 0, sizeof(CurrentChannel));

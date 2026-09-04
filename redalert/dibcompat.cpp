@@ -37,13 +37,26 @@ LPSTR FindDIBBits(LPCSTR dib)
     return (LPSTR)dib + bi->biSize + PaletteSize(dib);
 }
 
+/*
+** A null dib means the icon was not found in the mix files, which is normal:
+** the lobby icons shipped with the online patch data and are absent from
+** retail data. Callers treat a zero size as "no icon".
+*/
 DWORD DIBWidth(LPCSTR dib)
 {
+    if (dib == NULL) {
+        return 0;
+    }
+
     return (DWORD)((const BITMAPINFOHEADER*)dib)->biWidth;
 }
 
 DWORD DIBHeight(LPCSTR dib)
 {
+    if (dib == NULL) {
+        return 0;
+    }
+
     LONG h = ((const BITMAPINFOHEADER*)dib)->biHeight;
     return (DWORD)(h < 0 ? -h : h);
 }

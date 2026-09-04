@@ -28,6 +28,7 @@
 //	wasn't written 5 years ago, I don't know...
 
 #include "wolapiob.h"
+#include <string.h>
 //class WolapiObject;
 class IconListClass;
 class EditClass;
@@ -280,7 +281,16 @@ protected:
 
     bool bProcess;                                        //	True means continue doing input loop.
     RESULT_WOLGSUP ResultReturn;                          //	Value that will be returned from Show().
-    char szNameOfHostWhoJustBailedOnUs[WOL_NAME_LEN_MAX]; //	If set, triggers setup cancellation.
+    //	Holds either a nickname or the TXT_WOL_THEGAMEHOST stand-in, which is
+    //	longer than a nickname, so this cannot be sized to WOL_NAME_LEN_MAX.
+    char szNameOfHostWhoJustBailedOnUs[64]; //	If set, triggers setup cancellation.
+
+    void Copy_Bailed_Host_Name(const char* name)
+    {
+        strncpy(szNameOfHostWhoJustBailedOnUs, name != nullptr ? name : "",
+                sizeof(szNameOfHostWhoJustBailedOnUs) - 1);
+        szNameOfHostWhoJustBailedOnUs[sizeof(szNameOfHostWhoJustBailedOnUs) - 1] = '\0';
+    }
 
     bool bParamsReceived; //	True after any WOL_GAMEOPT_INFPARAMS messages have been received from a host.
 

@@ -22,6 +22,7 @@
 //	ajw 7/8/98
 
 #include "function.h"
+#include "common/framelimit.h"
 #include "iconlist.h"
 #include "wolapiob.h"
 #include "seditdlg.h"
@@ -615,8 +616,10 @@ int WOL_Chat_Dialog(WolapiObject* pWO)
         //	Force mouse visible, as some beta testers report unexplicable disappearing cursors.
         while (Get_Mouse_State())
             Show_Mouse();
-        //	Be nice to other apps.
-        Sleep(50);
+        //	Present the frame and pace the loop. The original drew straight to a
+        //	DirectDraw surface and only needed to yield here; the portable
+        //	backends render nothing until the frame limiter flips the page.
+        Frame_Limiter();
 
         //.....................................................................
         //	Get user input
@@ -1115,9 +1118,13 @@ bool EnterChannel(WolapiObject* pWO, IconListClass& chatlist, Channel* pChannel,
     bool bKeepTrying = true;
 
     //	Set password automatically for our lobbies, if trying to join one.
+    //	Channel::key holds 8 characters plus a null, so the copy has to be
+    //	bounded: LOBBYPASSWORD is a placeholder that is longer than the field.
     int iLobby = iChannelLobbyNumber(pChannel->name);
-    if (iLobby != -1)
-        strcpy((char*)pChannel->key, LOBBYPASSWORD);
+    if (iLobby != -1) {
+        strncpy((char*)pChannel->key, LOBBYPASSWORD, sizeof(pChannel->key) - 1);
+        pChannel->key[sizeof(pChannel->key) - 1] = '\0';
+    }
 
     char szSuccessfulPassword[WOL_PASSWORD_LEN + 5];
     *szSuccessfulPassword = 0;
